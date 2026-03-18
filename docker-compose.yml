@@ -1,0 +1,147 @@
+version: '3.8'
+
+# =============================================================================
+# Dr. Ikechukwu PA - Local Development Environment
+# =============================================================================
+# This enables containerized local development with all MCP servers
+# 
+# Usage:
+#   docker-compose up -d          # Start all services
+#   docker-compose logs -f       # View logs
+#   docker-compose down          # Stop all services
+#
+# Requirements:
+#   - Docker Desktop installed
+#   - .env file with API keys configured
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Flask API Backend
+  # ---------------------------------------------------------------------------
+  flask-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dr_ikechukwu_pa_api
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./src:/app/src
+      - ./project_workspace:/app/project_workspace
+    depends_on:
+      - neon-db
+    networks:
+      - dr_ikechukwu_network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Neon Postgres (Free Tier)
+  # State persistence for LangGraph checkpointing
+  # ---------------------------------------------------------------------------
+  neon-db:
+    image: postgres:15-alpine
+    container_name: dr_ikechukwu_pa_db
+    environment:
+      - POSTGRES_USER=dr_ikechukwu_pa
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change_me_in_production}
+      - POSTGRES_DB=dr_ikechukwu_pa
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - dr_ikechukwu_network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Qdrant Vector Database (Free Cloud - external)
+  # Note: For local Qdrant, uncomment below and update config
+  # ---------------------------------------------------------------------------
+  # qdrant-local:
+  #   image: qdrant/qdrant:latest
+  #   container_name: dr_ikechukwu_pa_qdrant
+  #   ports:
+  #     - "6333:6333"
+  #     - "6334:6334"
+  #   volumes:
+  #     - qdrant_data:/qdrant/storage
+  #   networks:
+  #     - dr_ikechukwu_network
+  #   restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # MCP Servers (via npx)
+  # These are started alongside the Flask app for local development
+  # ---------------------------------------------------------------------------
+  mcp-pubmed:
+    image: node:20-alpine
+    container_name: dr_ikechukwu_pa_mcp_pubmed
+    command: npx -y pubmed-search-mcp
+    profiles:
+      - mcp
+    networks:
+      - dr_ikechukwu_network
+
+  mcp-github:
+    image: node:20-alpine
+    container_name: dr_ikechukwu_pa_mcp_github
+    command: npx -y @modelcontextprotocol/server-github
+    env_file:
+      - .env
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    profiles:
+      - mcp
+    networks:
+      - dr_ikechukwu_network
+
+  mcp-filesystem:
+    image: node:20-alpine
+    container_name: dr_ikechukwu_pa_mcp_filesystem
+    command: npx -y @modelcontextprotocol/server-filesystem /app/project_workspace
+    volumes:
+      - ./project_workspace:/app/project_workspace
+    profiles:
+      - mcp
+    networks:
+      - dr_ikechukwu_network
+
+  mcp-financial:
+    image: node:20-alpine
+    container_name: dr_ikechukwu_pa_mcp_financial
+    command: npx -y @financial-datasets/mcp-server
+    profiles:
+      - mcp
+    networks:
+      - dr_ikechukwu_network
+
+  mcp-playwright:
+    image: mcp/playwright:latest
+    container_name: dr_ikechukwu_pa_mcp_playwright
+    command: npx -y @modelcontextprotocol/server-playwright
+    profiles:
+      - mcp
+    networks:
+      - dr_ikechukwu_network
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  dr_ikechukwu_network:
+    driver: bridge
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  postgres_data:
+    driver: local
+  qdrant_data:
+    driver: local

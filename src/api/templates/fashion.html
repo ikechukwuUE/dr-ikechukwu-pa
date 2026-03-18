@@ -1,0 +1,464 @@
+{% extends "base.html" %}
+
+{% block title %}Fashion & Lifestyle - DR. IKECHUKWU PA{% endblock %}
+
+{% block content %}
+<div class="fashion-container">
+    <div class="page-header">
+        <h1>👔 Fashion & Lifestyle</h1>
+        <p class="subtitle">Dual-domain styling for corporate and cultural occasions</p>
+    </div>
+
+    <div class="domain-tabs">
+        <button class="tab-btn active" onclick="switchDomain('corporate')">🏢 Corporate</button>
+        <button class="tab-btn" onclick="switchDomain('cultural')">🎭 Cultural</button>
+    </div>
+
+    <div class="fashion-interface">
+        <div class="query-panel">
+            <h2>Style Consultation</h2>
+            <form id="fashion-form">
+                <div class="form-group">
+                    <label for="query">Your Style Question</label>
+                    <textarea 
+                        id="query" 
+                        name="query" 
+                        rows="5" 
+                        placeholder="Describe your styling need (e.g., 'I need an outfit for a tech conference in Lagos' or 'Suggest Ankara styles for a wedding')"
+                        required
+                    ></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="budget">Budget Range (₦)</label>
+                    <select id="budget" name="budget">
+                        <option value="under50k">Under ₦50,000</option>
+                        <option value="50k-100k">₦50,000 - ₦100,000</option>
+                        <option value="100k-250k">₦100,000 - ₦250,000</option>
+                        <option value="250k-500k">₦250,000 - ₦500,000</option>
+                        <option value="over500k">Over ₦500,000</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="occasion">Occasion</label>
+                    <select id="occasion" name="occasion">
+                        <option value="conference">Conference/Work</option>
+                        <option value="wedding">Wedding</option>
+                        <option value="casual">Casual/Daily</option>
+                        <option value="date">Date Night</option>
+                        <option value="cultural">Cultural Event</option>
+                        <option value="formal">Formal</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Get Style Recommendations</button>
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="response-panel" id="response-panel" style="display: none;">
+            <h2>Style Recommendations</h2>
+            <div class="response-content">
+                <div class="outfit-suggestion">
+                    <h3>👕 Recommended Outfit</h3>
+                    <p id="outfit-content"></p>
+                </div>
+                
+                <div class="shopping-sources">
+                    <h3>🛒 Where to Buy</h3>
+                    <ul id="shopping-list"></ul>
+                </div>
+                
+                <div class="budget-breakdown">
+                    <h3>💰 Budget Breakdown</h3>
+                    <p id="budget-content"></p>
+                </div>
+                
+                <div class="style-tips">
+                    <h3>💡 Style Tips</h3>
+                    <ul id="tips-list"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="trends-section">
+        <h3>Current Trends</h3>
+        <div class="trends-grid">
+            <div class="trend-card">
+                <h4>👔 Corporate</h4>
+                <ul>
+                    <li>Tailored suits in navy, charcoal</li>
+                    <li>Oxford shirts in pastels</li>
+                    <li>Leather loafers</li>
+                </ul>
+            </div>
+            <div class="trend-card">
+                <h4>🎭 Cultural</h4>
+                <ul>
+                    <li>Modern Ankara prints</li>
+                    <li>Senator wear with twist</li>
+                    <li>Agbada for events</li>
+                </ul>
+            </div>
+            <div class="trend-card">
+                <h4>👟 Footwear</h4>
+                <ul>
+                    <li>White sneakers</li>
+                    <li>Leather boots</li>
+                    <li>Monk strap shoes</li>
+                </ul>
+            </div>
+            <div class="trend-card">
+                <h4>💼 Accessories</h4>
+                <ul>
+                    <li>Minimalist watches</li>
+                    <li>Leather belts</li>
+                    <li>Quality sunglasses</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="disclaimer">
+        <p><strong>ℹ️ Note:</strong> Style recommendations are AI-generated suggestions. 
+        Personal preferences and body type should be considered. Prices are estimates and may vary.</p>
+    </div>
+</div>
+
+<style>
+.fashion-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.page-header h1 {
+    color: #d53f8c;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.domain-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.tab-btn {
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    background: #e2e8f0;
+    color: #333;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background: #d53f8c;
+    color: white;
+}
+
+.tab-btn:hover:not(.active) {
+    background: #cbd5e0;
+}
+
+.fashion-interface {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.query-panel, .response-panel {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: #d53f8c;
+    box-shadow: 0 0 0 3px rgba(213, 63, 140, 0.2);
+}
+
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: #d53f8c;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #d53f8c;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #b83280;
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background: #cbd5e0;
+}
+
+.response-content {
+    line-height: 1.6;
+}
+
+.outfit-suggestion, .shopping-sources, .budget-breakdown, .style-tips {
+    margin-bottom: 1.5rem;
+}
+
+.outfit-suggestion h3, .shopping-sources h3, .budget-breakdown h3, .style-tips h3 {
+    color: #2d3748;
+    margin-bottom: 0.75rem;
+}
+
+.shopping-sources ul, .style-tips ul {
+    padding-left: 1.5rem;
+}
+
+.trends-section {
+    margin-top: 3rem;
+}
+
+.trends-section h3 {
+    margin-bottom: 1rem;
+    color: #2d3748;
+}
+
+.trends-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.trend-card {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.trend-card h4 {
+    color: #d53f8c;
+    margin-bottom: 0.75rem;
+}
+
+.trend-card ul {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: #666;
+}
+
+.trend-card li {
+    margin-bottom: 0.25rem;
+}
+
+.disclaimer {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: #faf5ff;
+    border-left: 4px solid #9f7aea;
+    border-radius: 4px;
+}
+
+.disclaimer p {
+    margin: 0;
+    color: #553c9a;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .fashion-interface {
+        grid-template-columns: 1fr;
+    }
+    
+    .domain-tabs {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+let currentDomain = 'corporate';
+
+function switchDomain(domain) {
+    currentDomain = domain;
+    
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    event.target.classList.add('active');
+}
+
+document.getElementById('fashion-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const query = document.getElementById('query').value;
+    const budget = document.getElementById('budget').value;
+    const occasion = document.getElementById('occasion').value;
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const responsePanel = document.getElementById('response-panel');
+    
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting Recommendations...';
+    
+    // Show response panel with typing indicators
+    responsePanel.style.display = 'block';
+    responsePanel.classList.add('response-fade-in');
+    
+    // Show typing indicators in content areas
+    const outfitContent = document.getElementById('outfit-content');
+    const budgetContent = document.getElementById('budget-content');
+    
+    outfitContent.innerHTML = `
+        <div class="typing-indicator" style="display: flex; gap: 4px; padding: 10px;">
+            <span style="width: 8px; height: 8px; background: #d53f8c; border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; animation-delay: 0s;"></span>
+            <span style="width: 8px; height: 8px; background: #d53f8c; border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="width: 8px; height: 8px; background: #d53f8c; border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    `;
+    
+    budgetContent.innerHTML = `
+        <div class="typing-indicator" style="display: flex; gap: 4px; padding: 10px;">
+            <span style="width: 8px; height: 8px; background: #d53f8c; border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; animation-delay: 0s;"></span>
+            <span style="width: 8px; height: 8px; background: #d53f8c; border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="width: 8px; height: 8px; background: #d53f8c; border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    `;
+    
+    try {
+        const response = await fetch('/fashion/query', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                query: query,
+                budget: budget,
+                occasion: occasion,
+                domain: currentDomain
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Parse Markdown and render with fade-in
+            console.log('[Fashion] outfit type:', typeof data.outfit, 'Value:', data.outfit);
+            outfitContent.innerHTML = window.parseMarkdown(data.outfit || 'No outfit suggestion available');
+            outfitContent.classList.add('response-fade-in');
+            
+            const shoppingList = document.getElementById('shopping-list');
+            shoppingList.innerHTML = '';
+            (data.sources || []).forEach(source => {
+                console.log('[Fashion] source type:', typeof source, 'Value:', source);
+                const li = document.createElement('li');
+                li.innerHTML = window.parseMarkdown(source);
+                li.style.marginBottom = '8px';
+                shoppingList.appendChild(li);
+            });
+            
+            budgetContent.innerHTML = window.parseMarkdown(data.budget_breakdown || 'No budget breakdown available');
+            budgetContent.classList.add('response-fade-in');
+            
+            const tipsList = document.getElementById('tips-list');
+            tipsList.innerHTML = '';
+            (data.tips || []).forEach(tip => {
+                console.log('[Fashion] tip type:', typeof tip, 'Value:', tip);
+                const li = document.createElement('li');
+                li.innerHTML = window.parseMarkdown(tip);
+                li.style.marginBottom = '8px';
+                tipsList.appendChild(li);
+            });
+            
+            // Remove fade-in class after animation
+            setTimeout(() => {
+                outfitContent.classList.remove('response-fade-in');
+                budgetContent.classList.remove('response-fade-in');
+            }, 400);
+        } else {
+            outfitContent.textContent = 'Error: ' + (data.error || 'Unknown error');
+        }
+    } catch (error) {
+        outfitContent.textContent = 'Request failed: ' + error.message;
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Get Style Recommendations';
+    }
+});
+
+function clearForm() {
+    document.getElementById('query').value = '';
+    document.getElementById('budget').value = 'under50k';
+    document.getElementById('occasion').value = 'conference';
+    document.getElementById('response-panel').style.display = 'none';
+}
+</script>
+{% endblock %}

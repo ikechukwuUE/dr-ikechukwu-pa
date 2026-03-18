@@ -1,0 +1,383 @@
+{% extends "base.html" %}
+
+{% block title %}Wealth Management - DR. IKECHUKWU PA{% endblock %}
+
+{% block content %}
+<div class="finance-container">
+    <div class="page-header">
+        <h1>📈 Wealth Management</h1>
+        <p class="subtitle">AI-powered financial analysis with Human-in-the-Loop approval</p>
+    </div>
+
+    <div class="hitl-notice">
+        <p>🔒 <strong>Human-in-the-Loop Active:</strong> All financial decisions require your explicit approval before execution.</p>
+    </div>
+
+    <div class="finance-interface">
+        <div class="query-panel">
+            <h2>Financial Query</h2>
+            <form id="finance-form">
+                <div class="form-group">
+                    <label for="query">Your Financial Question</label>
+                    <textarea 
+                        id="query" 
+                        name="query" 
+                        rows="5" 
+                        placeholder="Describe your financial scenario (e.g., 'I have ₦5,000,000 to invest. What portfolio allocation would you recommend given current market conditions?')"
+                        required
+                    ></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Analyze Financial Scenario</button>
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="response-panel" id="response-panel" style="display: none;">
+            <h2>Analysis Result</h2>
+            <div class="response-content">
+                <div class="proposed-action">
+                    <h3>📋 Proposed Action</h3>
+                    <p id="proposed-action-content"></p>
+                </div>
+                
+                <div class="reasoning">
+                    <h3>💡 Reasoning</h3>
+                    <p id="reasoning-content"></p>
+                </div>
+                
+                <div class="approval-section" id="approval-section">
+                    <h3>⚖️ Approval Required</h3>
+                    <p>Please review the proposed action above and decide:</p>
+                    <div class="approval-buttons">
+                        <button class="btn btn-success" onclick="approveAction()">✅ Approve</button>
+                        <button class="btn btn-danger" onclick="rejectAction()">❌ Reject</button>
+                    </div>
+                </div>
+                
+                <div class="final-result" id="final-result" style="display: none;">
+                    <h3>Final Status</h3>
+                    <p id="final-status"></p>
+                    <p id="final-result-content"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="active-threads" id="active-threads">
+        <h3>Active Sessions</h3>
+        <div id="threads-list"></div>
+    </div>
+
+    <div class="disclaimer">
+        <p><strong>⚠️ Disclaimer:</strong> This system provides financial information for educational purposes. 
+        Past performance does not guarantee future results. Always consult a qualified financial advisor 
+        before making investment decisions.</p>
+    </div>
+</div>
+
+<style>
+.finance-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.page-header h1 {
+    color: #276749;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.hitl-notice {
+    background: #e6fffa;
+    border: 1px solid #38b2ac;
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.hitl-notice p {
+    margin: 0;
+    color: #234e52;
+}
+
+.finance-interface {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.query-panel, .response-panel {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: #48bb78;
+    box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.2);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #48bb78;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #38a169;
+}
+
+.btn-success {
+    background: #48bb78;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #38a169;
+}
+
+.btn-danger {
+    background: #e53e3e;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c53030;
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background: #cbd5e0;
+}
+
+.approval-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.response-content {
+    line-height: 1.6;
+}
+
+.proposed-action, .reasoning, .approval-section, .final-result {
+    margin-bottom: 1.5rem;
+}
+
+.proposed-action h3, .reasoning h3, .approval-section h3, .final-result h3 {
+    color: #2d3748;
+    margin-bottom: 0.75rem;
+}
+
+.active-threads {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: #f7fafc;
+    border-radius: 8px;
+}
+
+.disclaimer {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: #fffbeb;
+    border-left: 4px solid #f6e05e;
+    border-radius: 4px;
+}
+
+.disclaimer p {
+    margin: 0;
+    color: #744210;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .finance-interface {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+let currentThreadId = null;
+
+document.getElementById('finance-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const query = document.getElementById('query').value;
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const responsePanel = document.getElementById('response-panel');
+    
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+    
+    // Show response panel with typing indicator
+    responsePanel.style.display = 'block';
+    responsePanel.classList.add('response-fade-in');
+    
+    // Show typing indicator in both content areas
+    const proposedContent = document.getElementById('proposed-action-content');
+    const reasoningContent = document.getElementById('reasoning-content');
+    
+    proposedContent.innerHTML = `
+        <div class="typing-indicator" style="display: flex; gap: 4px; padding: 10px;">
+            <span style="width: 8px; height: 8px; background: #48bb78; border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; animation-delay: 0s;"></span>
+            <span style="width: 8px; height: 8px; background: #48bb78; border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="width: 8px; height: 8px; background: #48bb78; border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    `;
+    reasoningContent.innerHTML = `
+        <div class="typing-indicator" style="display: flex; gap: 4px; padding: 10px;">
+            <span style="width: 8px; height: 8px; background: #48bb78; border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; animation-delay: 0s;"></span>
+            <span style="width: 8px; height: 8px; background: #48bb78; border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="width: 8px; height: 8px; background: #48bb78; border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    `;
+    
+    try {
+        const response = await fetch('/finance/query', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                query: query
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            currentThreadId = data.thread_id;
+            
+            // Parse Markdown and render with fade-in
+            console.log('[Finance] proposed_action type:', typeof data.proposed_action, 'Value:', data.proposed_action);
+            console.log('[Finance] reasoning type:', typeof data.reasoning, 'Value:', data.reasoning);
+            proposedContent.innerHTML = window.parseMarkdown(data.proposed_action || 'No action proposed');
+            proposedContent.classList.add('response-fade-in');
+            
+            reasoningContent.innerHTML = window.parseMarkdown(data.reasoning || 'No reasoning provided');
+            reasoningContent.classList.add('response-fade-in');
+            
+            document.getElementById('approval-section').style.display = 'block';
+            document.getElementById('final-result').style.display = 'none';
+            
+            // Remove fade-in class after animation
+            setTimeout(() => {
+                proposedContent.classList.remove('response-fade-in');
+                reasoningContent.classList.remove('response-fade-in');
+            }, 400);
+        } else {
+            proposedContent.textContent = 'Error: ' + (data.error || 'Unknown error');
+        }
+    } catch (error) {
+        proposedContent.textContent = 'Request failed: ' + error.message;
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Analyze Financial Scenario';
+    }
+});
+
+async function approveAction() {
+    await processDecision('approve');
+}
+
+async function rejectAction() {
+    await processDecision('reject');
+}
+
+async function processDecision(decision) {
+    if (!currentThreadId) return;
+    
+    try {
+        const response = await fetch('/finance/approve', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                thread_id: currentThreadId,
+                decision: decision
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            document.getElementById('approval-section').style.display = 'none';
+            document.getElementById('final-result').style.display = 'block';
+            
+            const statusText = data.status === 'approved_and_executed' ? '✅ Approved & Executed' : '❌ Rejected';
+            document.getElementById('final-status').textContent = statusText;
+            console.log('[Finance] result type:', typeof data.result, 'Value:', data.result);
+            document.getElementById('final-result-content').innerHTML = window.parseMarkdown(data.result);
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        alert('Request failed: ' + error.message);
+    }
+}
+
+function clearForm() {
+    document.getElementById('query').value = '';
+    document.getElementById('response-panel').style.display = 'none';
+    currentThreadId = null;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+
+{% block title %}Clinical Decision Support - DR. IKECHUKWU PA{% endblock %}
+
+{% block content %}
+<div class="clinical-container">
+    <div class="page-header">
+        <h1>🏥 Clinical Decision Support</h1>
+        <p class="subtitle">Evidence-based medical recommendations powered by Multi-Agent AI System</p>
+    </div>
+
+    <div class="cds-interface">
+        <div class="query-panel">
+            <h2>New Query</h2>
+            <form id="clinical-form">
+                <div class="form-group">
+                    <label for="query">Clinical Query</label>
+                    <textarea 
+                        id="query" 
+                        name="query" 
+                        rows="4" 
+                        placeholder="Enter clinical question (e.g., 'Patient with BP 160/100, what are the treatment options?')"
+                        required
+                    ></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="patient-context">Patient Context (Optional)</label>
+                    <textarea 
+                        id="patient-context" 
+                        name="patient-context" 
+                        rows="3" 
+                        placeholder="Additional patient details, medical history, current medications..."
+                    ></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Analyze Query</button>
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="response-panel" id="response-panel" style="display: none;">
+            <h2>Clinical Analysis</h2>
+            <div class="response-content">
+                <div class="finding">
+                    <h3>Clinical Finding</h3>
+                    <p id="finding-content"></p>
+                </div>
+                
+                <div class="recommendations">
+                    <h3>Evidence-Based Recommendations</h3>
+                    <ul id="recommendations-list"></ul>
+                </div>
+                
+                <div class="references">
+                    <h3>References</h3>
+                    <ul id="references-list"></ul>
+                </div>
+                
+                <div class="metadata">
+                    <p><small>🔒 PII/PHI automatically redacted per Nigeria NH Act 2014</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="disclaimer">
+        <p><strong>⚠️ Disclaimer:</strong> This system is for educational and decision-support purposes only. 
+        Always consult relevant clinical guidelines and exercise professional judgment. 
+        The system does not replace qualified medical advice.</p>
+    </div>
+</div>
+
+<style>
+.clinical-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.page-header h1 {
+    color: #2c5282;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.cds-interface {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.query-panel, .response-panel {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #4299e1;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #3182ce;
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background: #cbd5e0;
+}
+
+.response-content {
+    line-height: 1.6;
+}
+
+.finding, .recommendations, .references {
+    margin-bottom: 1.5rem;
+}
+
+.finding h3, .recommendations h3, .references h3 {
+    color: #2d3748;
+    margin-bottom: 0.75rem;
+}
+
+.recommendations ul, .references ul {
+    padding-left: 1.5rem;
+}
+
+.metadata {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+    color: #48bb78;
+}
+
+.disclaimer {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: #fffbeb;
+    border-left: 4px solid #f6e05e;
+    border-radius: 4px;
+}
+
+.disclaimer p {
+    margin: 0;
+    color: #744210;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .cds-interface {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+document.getElementById('clinical-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const query = document.getElementById('query').value;
+    const patientContext = document.getElementById('patient-context').value;
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const responsePanel = document.getElementById('response-panel');
+    
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+    
+    // Show typing indicator in response panel
+    responsePanel.style.display = 'block';
+    responsePanel.classList.add('response-fade-in');
+    
+    // Show finding section with typing indicator
+    const findingContent = document.getElementById('finding-content');
+    findingContent.innerHTML = `
+        <div class="typing-indicator" style="display: flex; gap: 4px; padding: 10px;">
+            <span style="width: 8px; height: 8px; background: #4299e1; border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; animation-delay: 0s;"></span>
+            <span style="width: 8px; height: 8px; background: #4299e1; border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="width: 8px; height: 8px; background: #4299e1; border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; animation-delay: 0.4s;"></span>
+        </div>
+    `;
+    
+    try {
+        const response = await fetch('/cds/query', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                query: query,
+                patient_context: patientContext
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Parse Markdown and render with fade-in
+            console.log('[Clinical] finding type:', typeof data.finding, 'Value:', data.finding);
+            findingContent.innerHTML = window.parseMarkdown(data.response || data.finding || 'No finding available');
+            findingContent.classList.add('response-fade-in');
+            
+            const recommendationsList = document.getElementById('recommendations-list');
+            recommendationsList.innerHTML = '';
+            (data.recommendations || []).forEach(rec => {
+                console.log('[Clinical] recommendation type:', typeof rec, 'Value:', rec);
+                const li = document.createElement('li');
+                li.innerHTML = window.parseMarkdown(rec);
+                li.style.marginBottom = '8px';
+                recommendationsList.appendChild(li);
+            });
+            
+            const referencesList = document.getElementById('references-list');
+            referencesList.innerHTML = '';
+            (data.evidence || []).forEach(ref => {
+                console.log('[Clinical] evidence type:', typeof ref, 'Value:', ref);
+                const li = document.createElement('li');
+                li.style.marginBottom = '12px';
+                li.style.padding = '8px';
+                li.style.backgroundColor = '#f7fafc';
+                li.style.borderLeft = '3px solid #4299e1';
+                li.style.borderRadius = '4px';
+                
+                // Format reference with PMID if available
+                let refHtml = '';
+                if (typeof ref === 'object') {
+                    refHtml = `<strong>${ref.title || 'Unknown Title'}</strong><br>`;
+                    refHtml += `<small>${ref.authors || ''} ${ref.journal ? 'in ' + ref.journal : ''} ${ref.year || ''}</small><br>`;
+                    if (ref.pmid) {
+                        refHtml += `<small><a href="https://pubmed.ncbi.nlm.nih.gov/${ref.pmid}/" target="_blank" style="color: #4299e1;">PMID: ${ref.pmid}</a></small>`;
+                    }
+                    if (ref.url) {
+                        refHtml += ` | <a href="${ref.url}" target="_blank" style="color: #4299e1;">View</a>`;
+                    }
+                } else {
+                    refHtml = window.parseMarkdown(ref);
+                }
+                
+                li.innerHTML = refHtml;
+                referencesList.appendChild(li);
+            });
+            
+            // Remove fade-in class after animation
+            setTimeout(() => {
+                findingContent.classList.remove('response-fade-in');
+            }, 400);
+        } else {
+            findingContent.textContent = 'Error: ' + (data.error || 'Unknown error');
+        }
+    } catch (error) {
+        findingContent.textContent = 'Request failed: ' + error.message;
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Analyze Query';
+    }
+});
+
+function clearForm() {
+    document.getElementById('query').value = '';
+    document.getElementById('patient-context').value = '';
+    document.getElementById('response-panel').style.display = 'none';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - DR. IKECHUKWU PA{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="welcome-section">
+        <h1>Welcome to DR. IKECHUKWU PA</h1>
+        <p class="subtitle">Enterprise-Grade Multimodal Agentic AI Personal Assistant</p>
+        <div class="status-indicator">
+            <i class="fas fa-circle online"></i>
+            <span>Backend Status: Online</span>
+        </div>
+    </div>
+
+    <div class="domain-cards">
+        <div class="domain-card" onclick="window.location.href='/clinical'">
+            <div class="card-icon">
+                <i class="fas fa-heartbeat"></i>
+            </div>
+            <h3>Clinical Decision Support</h3>
+            <p>Evidence-based medical recommendations with PubMed integration</p>
+        </div>
+
+        <div class="domain-card" onclick="window.location.href='/finance'">
+            <div class="card-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h3>Wealth Management</h3>
+            <p>AI-powered financial analysis with human-in-the-loop approval</p>
+        </div>
+
+        <div class="domain-card" onclick="window.location.href='/ai'">
+            <div class="card-icon">
+                <i class="fas fa-code"></i>
+            </div>
+            <h3>AI Development Lab</h3>
+            <p>Code analysis, debugging, and optimization with GitHub integration</p>
+        </div>
+
+        <div class="domain-card" onclick="window.location.href='/fashion'">
+            <div class="card-icon">
+                <i class="fas fa-tshirt"></i>
+            </div>
+            <h3>Fashion & Lifestyle</h3>
+            <p>Dual-domain styling for corporate and cultural occasions</p>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="runDemo()">Run Demo</button>
+            <button class="btn btn-secondary" onclick="checkHealth()">Check Health</button>
+            <button class="btn btn-info" onclick="viewDocs()">View API Docs</button>
+        </div>
+    </div>
+
+    <div class="system-info">
+        <h2>System Status</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="label">Backend</span>
+                <span class="value" id="backend-status">Running</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Frontend</span>
+                <span class="value" id="frontend-status">Connected</span>
+            </div>
+            <div class="info-item">
+                <span class="label">LLM Services</span>
+                <span class="value" id="llm-status">Active</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-container {
+    padding: 2rem;
+    min-height: calc(100vh - 200px);
+    background: #0a0a0a;
+}
+
+.welcome-section {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.welcome-section h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, #00d4ff, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: #888;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    color: #10b981;
+}
+
+.domain-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.domain-card {
+    background: linear-gradient(145deg, #1a1a2e, #16213e);
+    border-radius: 16px;
+    padding: 2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid #2d2d44;
+    position: relative;
+    overflow: hidden;
+}
+
+.domain-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #00d4ff, #7c3aed);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.domain-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 212, 255, 0.15);
+    border-color: #00d4ff;
+}
+
+.domain-card:hover::before {
+    opacity: 1;
+}
+
+.card-icon {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.card-icon i {
+    font-size: 3rem;
+    /* Use gradient color directly - gradient text doesn't work well with Font Awesome */
+    background: linear-gradient(135deg, #00d4ff, #7c3aed);
+    -webkit-background-clip: text;
+    background-clip: text;
+    /* Fallback to gradient color for browsers that don't support background-clip */
+    color: #00d4ff;
+}
+
+.domain-card h3 {
+    color: #fff;
+    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.domain-card p {
+    color: #888;
+    font-size: 0.9rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.quick-actions {
+    background: linear-gradient(145deg, #1a1a2e, #16213e);
+    padding: 2rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    border: 1px solid #2d2d44;
+}
+
+.quick-actions h2 {
+    margin-bottom: 1rem;
+    color: #fff;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #00d4ff, #0099cc);
+    color: #000;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+}
+
+.btn-secondary {
+    background: #2d2d44;
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background: #3d3d54;
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    color: #fff;
+}
+
+.btn-info:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.3);
+}
+
+.system-info {
+    background: linear-gradient(145deg, #1a1a2e, #16213e);
+    padding: 2rem;
+    border-radius: 16px;
+    border: 1px solid #2d2d44;
+}
+
+.system-info h2 {
+    margin-bottom: 1rem;
+    color: #fff;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #0a0a0a;
+    border-radius: 8px;
+    border: 1px solid #2d2d44;
+}
+
+.label {
+    font-weight: 500;
+    color: #888;
+}
+
+.value {
+    font-weight: 600;
+    color: #10b981;
+}
+
+.online {
+    color: #10b981;
+}
+
+.offline {
+    color: #ef4444;
+}
+</style>
+
+<script>
+function runDemo() {
+    alert('Demo mode activated! This will showcase all features of DR. IKECHUKWU PA.');
+    // In a real implementation, this would trigger demo workflows
+}
+
+function checkHealth() {
+    fetch('/api/health')
+        .then(response => response.json())
+        .then(data => {
+            alert(`Health Check:\n\nStatus: ${data.status}\n\n${data.message}`);
+        })
+        .catch(error => {
+            alert('Health check failed. Please ensure the backend is running.');
+        });
+}
+
+function viewDocs() {
+    window.location.href = '/docs';
+}
+
+// Check backend status on page load
+document.addEventListener('DOMContentLoaded', function() {
+    checkBackendStatus();
+});
+
+function checkBackendStatus() {
+    fetch('/api/health')
+        .then(response => response.json())
+        .then(data => {
+            const statusBadge = document.getElementById('status-badge');
+            const backendStatus = document.getElementById('backend-status');
+            
+            if (data.status === 'healthy') {
+                statusBadge.innerHTML = '<i class="fas fa-circle online"></i> Online';
+                backendStatus.textContent = 'Running';
+            } else {
+                statusBadge.innerHTML = '<i class="fas fa-circle offline"></i> Offline';
+                backendStatus.textContent = 'Not Running';
+            }
+        })
+        .catch(error => {
+            const statusBadge = document.getElementById('status-badge');
+            const backendStatus = document.getElementById('backend-status');
+            
+            statusBadge.innerHTML = '<i class="fas fa-circle offline"></i> Offline';
+            backendStatus.textContent = 'Not Running';
+        });
+}
+</script>
+{% endblock %}
