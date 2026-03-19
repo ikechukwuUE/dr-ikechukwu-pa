@@ -1,0 +1,48 @@
+# --- Core Framework & Web ---
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+pydantic[email]>=2.9.0
+pydantic-settings>=2.8.0
+python-multipart>=0.0.9
+python-dotenv>=1.0.1
+httpx>=0.27.0
+
+# --- AI & Orchestration ---
+crewai==1.10.1
+fastmcp==2.12.3
+langchain>=0.1.10
+langchain-core>=0.1.10
+langchain-openai>=0.1.0
+langgraph>=0.0.20
+openai>=1.20.0
+
+# --- Vector DB & Machine Learning ---
+qdrant-client>=1.7.0
+sentence-transformers>=2.2.2
+torch>=2.1.2
+numpy>=1.24.3
+
+# --- Security & Auth ---
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+bcrypt>=4.0.1
+
+# --- Utilities & Caching ---
+slowapi>=0.1.9
+redis>=5.0.1
+
+# --- PDF & Image Processing ---
+pillow>=10.2.0
+reportlab>=4.0.7
+weasyprint>=60.1
+
+# --- Testing ---
+pytest>=7.4.3
+pytest-asyncio>=0.23.3
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0
+
+# --- Observability & Logging ---
+structlog>=23.2.0
+prometheus-client>=0.19.0
+tenacity>=8.2.3

@@ -1,216 +1,158 @@
-import axios, { type AxiosInstance } from 'axios';
+// API Service for Dr. Ikechukwu PA Backend
+import axios, { AxiosInstance } from 'axios'
 
-// API Base URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
-// Create axios instance
-const apiClient: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 30000,
-});
+class APIService {
+  private client: AxiosInstance
 
-// Message type for ChatInterface
-export interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: string;
-  domain?: string;
-}
-
-// Error handler helper
-export function getErrorMessage(error: unknown): string {
-  if (axios.isAxiosError(error)) {
-    return error.response?.data?.error || error.message || 'An error occurred';
+  constructor() {
+    this.client = axios.create({
+      baseURL: API_BASE_URL,
+      timeout: 60000,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
   }
-  return error instanceof Error ? error.message : 'An unknown error occurred';
+
+  // ============ Clinical Decision Support (CDS) ============
+  async analyzePatient(patientData: {
+    patient_id?: string
+    age: number
+    sex: 'male' | 'female' | 'other'
+    occupation?: string
+    married?: boolean
+    weight_kg?: number
+    height_cm?: number
+    chief_complaint: string
+    symptoms: string[]
+    medical_history: string[]
+    current_medications: string[]
+    allergies: string[]
+    vital_signs?: Record<string, unknown>
+  }, images?: string[]) {
+    const payload: any = {
+      patient_info: patientData,
+    }
+    if (images && images.length > 0) {
+      payload.images = images
+    }
+    const response = await this.client.post('/api/cds/analyze', payload)
+    return response.data
+  }
+
+  async getSpecialists() {
+    const response = await this.client.get('/api/cds/specialists')
+    return response.data
+  }
+
+  async queryMedicalResearch(data: {
+    query: string
+    include_clinical_trials?: boolean
+    max_results?: number
+    sort_by_evidence?: boolean
+    min_evidence_level?: 'clinical_guidelines' | 'meta_analysis' | 'rct' | 'controlled_trial' | 'cohort' | 'case_control' | 'case_series' | 'case_report' | 'expert_opinion' | 'preclinical' | 'unknown'
+  }) {
+    const response = await this.client.post('/api/cds/query', {
+      query: data.query,
+      include_clinical_trials: data.include_clinical_trials ?? false,
+      max_results: data.max_results ?? 5,
+      sort_by_evidence: data.sort_by_evidence ?? true,
+      min_evidence_level: data.min_evidence_level
+    })
+    return response.data
+  }
+
+  // ============ Finance ============
+  async analyzeFinance(data: {
+    query_type: 'investment' | 'budget' | 'tax' | 'retirement' | 'debt' | 'general'
+    question: string
+    financial_goals?: string[]
+    risk_tolerance?: 'conservative' | 'moderate' | 'aggressive'
+    time_horizon_years?: number
+  }) {
+    const response = await this.client.post('/api/finance/analyze', {
+      query: data,
+    })
+    return response.data
+  }
+
+  async analyzePortfolio(portfolio: {
+    stocks?: Record<string, number>
+    bonds?: Record<string, number>
+    etfs?: Record<string, number>
+    cash?: number
+    crypto?: Record<string, number>
+  }) {
+    const response = await this.client.post('/api/finance/portfolio/analyze', portfolio)
+    return response.data
+  }
+
+  // ============ Fashion ============
+  async analyzeFashion(data: {
+    query_type: 'style' | 'trend' | 'outfit' | 'accessory' | 'general'
+    question: string
+    occasion?: string
+    season?: string
+    body_type?: string
+    personal_style?: string[]
+  }, imageData?: string) {
+    const payload: any = {
+      query: data,
+    }
+    if (imageData) {
+      payload.image_analysis = {
+        image_data: imageData,
+        analysis_type: ['style', 'color', 'trend', 'occasion'],
+      }
+    }
+    const response = await this.client.post('/api/fashion/analyze', payload)
+    return response.data
+  }
+
+  async getOutfitRecommendation(occasion: string, weather?: string) {
+    const response = await this.client.get('/api/fashion/outfit', {
+      params: { occasion, weather },
+    })
+    return response.data
+  }
+
+  // ============ AI Development ============
+  async generateCode(data: {
+    language: string
+    task_description: string
+    constraints?: string[]
+    test_cases?: string[]
+    framework?: string
+  }) {
+    const response = await this.client.post('/api/aidev/generate', data)
+    return response.data
+  }
+
+  async debugCode(data: {
+    code: string
+    error_message?: string
+    language: string
+    context?: string
+  }) {
+    const response = await this.client.post('/api/aidev/debug', data)
+    return response.data
+  }
+
+  async reviewCode(code: string, language: string) {
+    const response = await this.client.post('/api/aidev/review', null, {
+      params: { code, language },
+    })
+    return response.data
+  }
+
+  // ============ Health Check ============
+  async healthCheck() {
+    const response = await this.client.get('/health')
+    return response.data
+  }
 }
 
-// CDS API
-export const cdsApi = {
-  query: (query: string, context?: string) =>
-    apiClient.post('/cds/query', { query, patient_context: context }),
-  health: () => apiClient.get('/cds/health'),
-  agents: () => apiClient.get('/cds/agents'),
-};
-
-// Chat helper functions for ChatInterface
-export const sendCDSMessage = async (params: { message: string; context?: Record<string, unknown> }) => {
-  const response = await cdsApi.query(params.message, params.context?.patient_context as string);
-  // Transform to chat format
-  const data = response.data;
-  return {
-    response: data.response || data.recommendations?.join('\n') || '',
-    recommendations: data.recommendations || [],
-    evidence: data.evidence || [],
-    agent_id: data.agent_id,
-    confidence: data.confidence,
-  };
-};
-
-export const sendFinanceQuery = async (params: { query: string }) => {
-  const response = await financeApi.query(params.query);
-  const data = response.data;
-  return {
-    response: data.proposed_action || data.reasoning || '',
-    reasoning: data.reasoning,
-    hitlRequired: data.status === 'pending_approval',
-    thread_id: data.thread_id,
-  };
-};
-
-// Finance API
-export const financeApi = {
-  query: (query: string) =>
-    apiClient.post('/finance/query', { query }),
-  approve: (threadId: string, decision: string) =>
-    apiClient.post('/finance/approve', { thread_id: threadId, decision }),
-  threads: () => apiClient.get('/finance/threads'),
-  reflectionAnalyze: (query: string) =>
-    apiClient.post('/finance/reflection/analyze', { query }),
-  getReflectionStatus: (threadId: string) =>
-    apiClient.get(`/finance/reflection/status/${threadId}`),
-};
-
-// HITL helper functions
-export const getPendingApprovals = async () => {
-  const response = await apiClient.get('/finance/threads');
-  const threads = response.data.threads || [];
-  return threads
-    .filter((t: { status: string }) => t.status === 'pending_approval')
-    .map((t: { thread_id: string; query: string; current_stage: string }) => ({
-      id: t.thread_id,
-      type: 'Financial Analysis',
-      description: t.query?.substring(0, 100) || 'Financial query',
-      timestamp: new Date().toISOString(),
-    }));
-};
-
-export const approveFinanceAction = async (actionId: string) => {
-  return financeApi.approve(actionId, 'approve');
-};
-
-export const rejectFinanceAction = async (actionId: string, reason: string) => {
-  return financeApi.approve(actionId, 'reject');
-};
-
-// AI Dev API
-export const aiDevApi = {
-  query: (query: string, language?: string) =>
-    apiClient.post('/ai/query', { query, language: language || 'python' }),
-  analyze: (query: string, codeSnippet?: string, repo?: string, filePath?: string) =>
-    apiClient.post('/ai/analyze', { query, code_snippet: codeSnippet, repo, file_path: filePath }),
-  health: () => apiClient.get('/ai/health'),
-};
-
-// analyzeCode helper for AIDev page
-export interface AIDevResponse {
-  status: string;
-  analysis: string;
-  issues: Array<{
-    severity: string;
-    message: string;
-    suggestion?: string;
-    line?: number;
-  }>;
-  suggestions: string[];
-  metadata?: Record<string, unknown>;
-}
-
-export const analyzeCode = async (params: {
-  code: string;
-  language: string;
-  analysisType: string;
-}): Promise<AIDevResponse> => {
-  // Map analysis type to query
-  const queryMap: Record<string, string> = {
-    full: `Perform full analysis on this ${params.language} code`,
-    security: `Analyze this ${params.language} code for security vulnerabilities`,
-    performance: `Analyze this ${params.language} code for performance issues`,
-    best_practices: `Review this ${params.language} code for best practices`,
-  };
-  
-  const response = await aiDevApi.analyze(
-    queryMap[params.analysisType] || queryMap.full,
-    params.code
-  );
-  return response.data;
-};
-
-// Fashion API
-export const fashionApi = {
-  query: (query: string, budget?: string, occasion?: string, domain?: string) =>
-    apiClient.post('/fashion/query', { 
-      query, 
-      budget: budget || '50k-150k NGN',
-      occasion: occasion || '',
-      domain: domain || 'both'
-    }),
-  style: (occasion: string, styleDomain?: string, budgetRange?: string, preferences?: string) =>
-    apiClient.post('/fashion/style', {
-      occasion,
-      style_domain: styleDomain || 'both',
-      budget_range: budgetRange || '50k-150k NGN',
-      preferences: preferences || ''
-    }),
-  corporate: (occasion: string, budgetRange?: string, preferences?: string) =>
-    apiClient.post('/fashion/corporate', { occasion, budget_range: budgetRange, preferences }),
-  cultural: (occasion: string, budgetRange?: string, preferences?: string) =>
-    apiClient.post('/fashion/cultural', { occasion, budget_range: budgetRange, preferences }),
-  health: () => apiClient.get('/fashion/health'),
-};
-
-// Fashion helper functions and types
-export interface FashionResponse {
-  status: string;
-  outfit?: string;
-  recommendations?: string[];
-  stylingTips?: string[];
-  colorPalette?: string[];
-  sources?: string[];
-  budget_breakdown?: string;
-  tips?: string[];
-  metadata?: Record<string, unknown>;
-}
-
-export const getFashionRecommendations = async (params: {
-  style: string;
-  preferences?: string;
-  occasion?: string;
-  bodyType?: string;
-}): Promise<FashionResponse> => {
-  const response = await fashionApi.query(
-    params.style,
-    '50k-150k NGN',
-    params.occasion,
-    'both'
-  );
-  const data = response.data;
-  
-  // Transform response to match expected format
-  return {
-    status: data.status,
-    recommendations: data.outfit ? [data.outfit] : [],
-    stylingTips: data.tips || [],
-    colorPalette: [],
-    sources: data.sources || [],
-    budget_breakdown: data.budget_breakdown,
-    metadata: data.metadata,
-  };
-};
-
-// Evaluation API
-export const evaluationApi = {
-  submitRating: (interactionId: string, rating: number, feedback?: string) =>
-    apiClient.post('/evaluation/feedback', { 
-      interaction_id: interactionId, 
-      rating, 
-      feedback 
-    }),
-  getMetrics: () => apiClient.get('/evaluation/metrics'),
-};
-
-export default apiClient;
+export const api = new APIService()
+export default api

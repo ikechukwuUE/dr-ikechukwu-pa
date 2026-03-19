@@ -1,185 +1,221 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import ChatInterface from '../components/ChatInterface';
-import RatingDialog from '../components/RatingDialog';
-import { 
-  getPendingApprovals, 
-  approveFinanceAction, 
-  rejectFinanceAction,
-  getErrorMessage 
-} from '../services/api';
+import { useState } from 'react'
+import {
+  Box,
+  Container,
+  Typography,
+  TextField,
+  Button,
+  CardContent,
+  Grid,
+  MenuItem,
+  Alert,
+  CircularProgress,
+  Paper,
+} from '@mui/material'
+import { useNavigate } from 'react-router-dom'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
+import api from '../services/api'
 
-interface PendingApproval {
-  id: string;
-  type: string;
-  amount?: number;
-  description: string;
-  timestamp: string;
-}
+export default function Finance() {
+  const navigate = useNavigate()
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<unknown>(null)
+  const [formData, setFormData] = useState({
+    query_type: 'investment' as 'investment' | 'budget' | 'tax' | 'retirement' | 'debt' | 'general',
+    question: '',
+    risk_tolerance: 'moderate' as 'conservative' | 'moderate' | 'aggressive',
+  })
 
-export const Finance: React.FC = () => {
-  const [pendingApprovals, setPendingApprovals] = useState<PendingApproval[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showRating, setShowRating] = useState(false);
-  const [lastInteractionId, setLastInteractionId] = useState<string>('');
-  const [processingId, setProcessingId] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchPendingApprovals();
-  }, []);
-
-  const fetchPendingApprovals = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
     try {
-      const approvals = await getPendingApprovals();
-      setPendingApprovals(approvals);
+      const response = await api.analyzeFinance(formData)
+      setResult(response.data)
     } catch (error) {
-      console.error('Error fetching approvals:', error);
+      console.error('Analysis failed:', error)
     } finally {
-      setIsLoading(false);
+      setLoading(false)
     }
-  };
-
-  const handleApprove = async (actionId: string) => {
-    setProcessingId(actionId);
-    try {
-      await approveFinanceAction(actionId);
-      setPendingApprovals(prev => prev.filter(a => a.id !== actionId));
-    } catch (error) {
-      console.error('Error approving:', error);
-      alert('Failed to approve: ' + getErrorMessage(error));
-    } finally {
-      setProcessingId(null);
-    }
-  };
-
-  const handleReject = async (actionId: string) => {
-    const reason = prompt('Please provide a reason for rejection:');
-    if (!reason) return;
-
-    setProcessingId(actionId);
-    try {
-      await rejectFinanceAction(actionId, reason);
-      setPendingApprovals(prev => prev.filter(a => a.id !== actionId));
-    } catch (error) {
-      console.error('Error rejecting:', error);
-      alert('Failed to reject: ' + getErrorMessage(error));
-    } finally {
-      setProcessingId(null);
-    }
-  };
-
-  const handleResponse = (response: unknown) => {
-    const resp = response as { hitlRequired?: boolean };
-    if (resp.hitlRequired) {
-      // Refresh pending approvals after HITL request
-      setTimeout(fetchPendingApprovals, 1000);
-    }
-    setLastInteractionId(`finance-${Date.now()}`);
-    setTimeout(() => setShowRating(true), 2000);
-  };
+  }
 
   return (
-    <div className="domain-page finance-page">
-      <header className="domain-header">
-        <div className="header-nav">
-          <Link to="/dashboard" className="back-link">
-            ← Back to Dashboard
-          </Link>
-        </div>
-        <div className="header-content">
-          <h1>💰 Financial Analysis</h1>
-          <p>Smart financial queries with human-in-the-loop approval</p>
-        </div>
-      </header>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0A0A0F 0%, #0F1419 50%, #0A0F14 100%)',
+        py: 4,
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'radial-gradient(ellipse at 20% 20%, rgba(5, 150, 105, 0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 50%)',
+          pointerEvents: 'none',
+        },
+      }}
+    >
+      <Container maxWidth="lg" sx={{ position: 'relative' }}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate('/')}
+          sx={{ mb: 3, color: 'text.secondary' }}
+        >
+          Back to Dashboard
+        </Button>
 
-      <main className="domain-main">
-        <div className="content-grid">
-          <div className="chat-section">
-            <ChatInterface domain="finance" onResponse={handleResponse} />
-          </div>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
+          <Box
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: 2,
+              background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <AccountBalanceIcon sx={{ color: 'white' }} />
+          </Box>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 700 }}>
+              Finance
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              AI-powered financial analysis and investment strategies
+            </Typography>
+          </Box>
+        </Box>
 
-          <aside className="sidebar">
-            <div className="pending-approvals-card">
-              <h3>Pending Approvals</h3>
-              
-              {isLoading ? (
-                <div className="loading-small">
-                  <div className="spinner-small"></div>
-                </div>
-              ) : pendingApprovals.length === 0 ? (
-                <p className="no-approvals">No pending approvals</p>
-              ) : (
-                <ul className="approvals-list">
-                  {pendingApprovals.map((approval) => (
-                    <li key={approval.id} className="approval-item">
-                      <div className="approval-info">
-                        <span className="approval-type">{approval.type}</span>
-                        {approval.amount && (
-                          <span className="approval-amount">
-                            ${approval.amount.toLocaleString()}
-                          </span>
-                        )}
-                        <span className="approval-description">
-                          {approval.description}
-                        </span>
-                        <span className="approval-time">
-                          {new Date(approval.timestamp).toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="approval-actions">
-                        <button
-                          className="approve-btn"
-                          onClick={() => handleApprove(approval.id)}
-                          disabled={processingId === approval.id}
-                        >
-                          ✓ Approve
-                        </button>
-                        <button
-                          className="reject-btn"
-                          onClick={() => handleReject(approval.id)}
-                          disabled={processingId === approval.id}
-                        >
-                          ✗ Reject
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={6}>
+            <Paper
+              elevation={0}
+              sx={{
+                height: '100%',
+                background: 'rgba(15, 23, 42, 0.6)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(148, 163, 184, 0.1)',
+                borderRadius: 3,
+              }}
+            >
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" sx={{ mb: 3 }}>
+                  Financial Query
+                </Typography>
+                <form onSubmit={handleSubmit}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        select
+                        label="Query Type"
+                        value={formData.query_type}
+                        onChange={(e) => setFormData({ ...formData, query_type: e.target.value as typeof formData.query_type })}
+                      >
+                        <MenuItem value="investment">Investment</MenuItem>
+                        <MenuItem value="budget">Budget</MenuItem>
+                        <MenuItem value="tax">Tax</MenuItem>
+                        <MenuItem value="retirement">Retirement</MenuItem>
+                        <MenuItem value="debt">Debt</MenuItem>
+                        <MenuItem value="general">General</MenuItem>
+                      </TextField>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        select
+                        label="Risk Tolerance"
+                        value={formData.risk_tolerance}
+                        onChange={(e) => setFormData({ ...formData, risk_tolerance: e.target.value as typeof formData.risk_tolerance })}
+                      >
+                        <MenuItem value="conservative">Conservative</MenuItem>
+                        <MenuItem value="moderate">Moderate</MenuItem>
+                        <MenuItem value="aggressive">Aggressive</MenuItem>
+                      </TextField>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label="Your Question"
+                        value={formData.question}
+                        onChange={(e) => setFormData({ ...formData, question: e.target.value })}
+                        required
+                        multiline
+                        rows={4}
+                        placeholder="e.g., What are the best investment options for retirement?"
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        fullWidth
+                        size="large"
+                        disabled={loading}
+                        sx={{
+                          background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
+                          py: 1.5,
+                        }}
+                      >
+                        {loading ? <CircularProgress size={24} color="inherit" /> : 'Analyze Finance'}
+                      </Button>
+                    </Grid>
+                  </Grid>
+                </form>
+              </CardContent>
+            </Paper>
+          </Grid>
 
-            <div className="reflection-status-card">
-              <h3>Reflection Status</h3>
-              <div className="status-indicator">
-                <span className="status-dot active"></span>
-                <span>Reflection Agent Active</span>
-              </div>
-              <p className="reflection-description">
-                Financial transactions over $10,000 require reflection review 
-                before execution.
-              </p>
-            </div>
-
-            <div className="info-card">
-              <h3>Features</h3>
-              <ul className="feature-list">
-                <li>Transaction analysis</li>
-                <li>Fraud detection</li>
-                <li>Investment recommendations</li>
-                <li>Budget optimization</li>
-              </ul>
-            </div>
-          </aside>
-        </div>
-      </main>
-
-      <RatingDialog
-        interactionId={lastInteractionId}
-        isOpen={showRating}
-        onClose={() => setShowRating(false)}
-      />
-    </div>
-  );
-};
-
-export default Finance;
+          <Grid item xs={12} md={6}>
+            <Paper
+              elevation={0}
+              sx={{
+                height: '100%',
+                background: 'rgba(15, 23, 42, 0.6)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(148, 163, 184, 0.1)',
+                borderRadius: 3,
+              }}
+            >
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" sx={{ mb: 3 }}>
+                  Analysis Results
+                </Typography>
+                {result ? (
+                  <Box>
+                    <Alert severity="success" sx={{ mb: 2 }}>
+                      Analysis completed.
+                    </Alert>
+                    <Typography variant="body2" color="text.secondary">
+                      {JSON.stringify(result, null, 2)}
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: 300,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    <AccountBalanceIcon sx={{ fontSize: 64, opacity: 0.3, mb: 2 }} />
+                    <Typography>Enter your financial question</Typography>
+                  </Box>
+                )}
+              </CardContent>
+            </Paper>
+          </Grid>
+        </Grid>
+      </Container>
+    </Box>
+  )
+}

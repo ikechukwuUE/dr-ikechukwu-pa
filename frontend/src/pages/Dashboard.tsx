@@ -1,93 +1,218 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { evaluationApi } from '../services/api';
+import { Box, Container, Typography, Grid, CardContent, CardActionArea, Chip, Paper } from '@mui/material'
+import { useNavigate } from 'react-router-dom'
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital'
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
+import CheckroomIcon from '@mui/icons-material/Checkroom'
+import CodeIcon from '@mui/icons-material/Code'
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser'
+import BuildIcon from '@mui/icons-material/Build'
+// import ScienceIcon from '@mui/icons-material/Science'
 
-interface DashboardStats {
-  averageRating: number;
-  totalInteractions: number;
-  helpfulPercentage: number;
-}
+const domains = [
+  {
+    id: 'clinical',
+    title: 'Clinical Decision Support',
+    description: 'AI-powered medical diagnosis and treatment recommendations using multimodal analysis with 16 specialist agents',
+    icon: LocalHospitalIcon,
+    color: '#0F766E',
+    gradient: 'linear-gradient(135deg, #0F766E 0%, #14B8A6 100%)',
+    orchestration: 'CrewAI Hierarchical',
+    tools: 5,
+  },
+  {
+    id: 'finance',
+    title: 'Finance',
+    description: 'Intelligent financial analysis, investment strategies, and portfolio management with multi-agent collaboration',
+    icon: AccountBalanceIcon,
+    color: '#059669',
+    gradient: 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
+    orchestration: 'CrewAI Hierarchical',
+    tools: 5,
+  },
+  {
+    id: 'fashion',
+    title: 'Fashion',
+    description: 'Style recommendations, trend analysis, and outfit suggestions with vision AI and multimodal processing',
+    icon: CheckroomIcon,
+    color: '#DC2626',
+    gradient: 'linear-gradient(135deg, #DC2626 0%, #F97316 100%)',
+    orchestration: 'Direct API + LangChain',
+    tools: 3,
+  },
+  {
+    id: 'aidev',
+    title: 'AI Development',
+    description: 'Code generation, debugging, and review with LangGraph state machines and tool orchestration',
+    icon: CodeIcon,
+    color: '#7C3AED',
+    gradient: 'linear-gradient(135deg, #7C3AED 0%, #A78BFA 100%)',
+    orchestration: 'LangGraph Cyclic',
+    tools: 4,
+  },
+]
 
-export const Dashboard: React.FC = () => {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const metrics = await evaluationApi.getMetrics();
-        if (metrics.data) {
-          setStats({
-            averageRating: metrics.data.average_rating || 0,
-            totalInteractions: metrics.data.total_interactions || 0,
-            helpfulPercentage: metrics.data.helpful_percentage || 0
-          });
-        }
-      } catch (error) {
-        console.error('Failed to fetch metrics:', error);
-        // Set default values on error
-        setStats({ averageRating: 0, totalInteractions: 0, helpfulPercentage: 0 });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+export default function Dashboard() {
+  const navigate = useNavigate()
 
   return (
-    <div className="dashboard-page">
-      <header className="dashboard-header">
-        <h1>Dr. Ikechukwu PA</h1>
-        <p>Your Multimodal AI Personal Assistant</p>
-      </header>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0A0A0F 0%, #0F1419 50%, #0A0F14 100%)',
+        py: 4,
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'radial-gradient(ellipse at 20% 20%, rgba(20, 184, 166, 0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.06) 0%, transparent 50%)',
+          pointerEvents: 'none',
+        },
+      }}
+    >
+      <Container maxWidth="lg" sx={{ position: 'relative', py: 4 }}>
+        {/* Header */}
+        <Box sx={{ textAlign: 'center', mb: 6 }}>
+          <Box
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 1,
+              mb: 2,
+              px: 3,
+              py: 1.5,
+              borderRadius: 3,
+              background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)',
+              border: '1px solid rgba(20, 184, 166, 0.2)',
+            }}
+          >
+            <AutoAwesomeIcon sx={{ color: 'primary.main', fontSize: 24 }} />
+            <Typography
+              variant="overline"
+              sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: 3, fontSize: '0.9rem' }}
+            >
+              Dr. Ikechukwu PA
+            </Typography>
+          </Box>
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 800,
+              mb: 2,
+              fontSize: { xs: '2rem', md: '3rem' },
+              background: 'linear-gradient(135deg, #F1F5F9 0%, #94A3B8 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+          >
+            Your AI-Powered Assistant
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ color: 'text.secondary', maxWidth: 700, mx: 'auto', fontWeight: 400, fontSize: '1.1rem' }}
+          >
+            A multimodal, multi-agent system for clinical support, finance, fashion, and AI development
+          </Typography>
+        </Box>
 
-      <main className="dashboard-main">
-        <section className="stats-section">
-          <div className="stat-card">
-            <h3>Total Interactions</h3>
-            <p className="stat-value">{isLoading ? '...' : stats?.totalInteractions || 0}</p>
-          </div>
-          <div className="stat-card">
-            <h3>Average Rating</h3>
-            <p className="stat-value">{isLoading ? '...' : stats?.averageRating?.toFixed(1) || 'N/A'}</p>
-          </div>
-          <div className="stat-card">
-            <h3>Helpful Rate</h3>
-            <p className="stat-value">{isLoading ? '...' : `${stats?.helpfulPercentage || 0}%`}</p>
-          </div>
-        </section>
+        {/* Domain Cards */}
+        <Grid container spacing={4}>
+          {domains.map((domain, index) => (
+            <Grid item xs={12} sm={6} key={domain.id}>
+              <Paper
+                elevation={0}
+                sx={{
+                  height: '100%',
+                  transition: 'all 0.3s ease',
+                  background: 'rgba(15, 23, 42, 0.6)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(148, 163, 184, 0.1)',
+                  '&:hover': {
+                    transform: `translateY(-8px)`,
+                    boxShadow: `0 20px 40px -12px ${domain.color}40`,
+                    border: `1px solid ${domain.color}40`,
+                  },
+                }}
+              >
+                <CardActionArea
+                  onClick={() => navigate(`/${domain.id}`)}
+                  sx={{ height: '100%', p: 3 }}
+                >
+                  <CardContent>
+                    <Box
+                      sx={{
+                        width: 56,
+                        height: 56,
+                        borderRadius: 2,
+                        background: domain.gradient,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mb: 2,
+                      }}
+                    >
+                      <domain.icon sx={{ color: 'white', fontSize: 28 }} />
+                    </Box>
+                    <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
+                      {domain.title}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                      {domain.description}
+                    </Typography>
+                    {/* Security & Tools Badges */}
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                      <Chip
+                        icon={<VerifiedUserIcon sx={{ fontSize: 16 }} />}
+                        label="IBM/Anthropic Secure"
+                        size="small"
+                        sx={{
+                          bgcolor: 'rgba(5, 150, 105, 0.1)',
+                          color: '#059669',
+                          fontWeight: 500,
+                          fontSize: '0.7rem',
+                        }}
+                      />
+                      <Chip
+                        icon={<BuildIcon sx={{ fontSize: 16 }} />}
+                        label={`${domain.tools} MCP Tools`}
+                        size="small"
+                        sx={{
+                          bgcolor: 'rgba(124, 58, 237, 0.1)',
+                          color: '#7C3AED',
+                          fontWeight: 500,
+                          fontSize: '0.7rem',
+                        }}
+                      />
+                      <Chip
+                        label={domain.orchestration}
+                        size="small"
+                        sx={{
+                          bgcolor: 'rgba(15, 118, 110, 0.1)',
+                          color: '#0F766E',
+                          fontWeight: 500,
+                          fontSize: '0.7rem',
+                        }}
+                      />
+                    </Box>
+                  </CardContent>
+                </CardActionArea>
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
 
-        <section className="domains-section">
-          <h2>Choose a Domain</h2>
-          <div className="domain-cards">
-            <Link to="/clinical" className="domain-card clinical">
-              <div className="domain-icon">🩺</div>
-              <h3>Clinical Decision Support</h3>
-              <p>AI-powered medical assistance</p>
-            </Link>
-
-            <Link to="/finance" className="domain-card finance">
-              <div className="domain-icon">💰</div>
-              <h3>Wealth Management</h3>
-              <p>Financial analysis & planning</p>
-            </Link>
-
-            <Link to="/ai-dev" className="domain-card ai-dev">
-              <div className="domain-icon">🤖</div>
-              <h3>AI Development Lab</h3>
-              <p>Code analysis & debugging</p>
-            </Link>
-
-            <Link to="/fashion" className="domain-card fashion">
-              <div className="domain-icon">👔</div>
-              <h3>Fashion & Lifestyle</h3>
-              <p>Style recommendations</p>
-            </Link>
-          </div>
-        </section>
-      </main>
-    </div>
-  );
-};
-
-export default Dashboard;
+        {/* Footer Info */}
+        <Box sx={{ mt: 8, textAlign: 'center' }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            Powered by OpenRouter • Built with FastAPI, CrewAI, LangGraph & React
+          </Typography>
+        </Box>
+      </Container>
+    </Box>
+  )
+}
