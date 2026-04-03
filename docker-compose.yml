@@ -1,0 +1,40 @@
+services:
+  # BeeAI Code Interpreter - required for PythonTool code execution
+  beeai-code-interpreter:
+    image: i-am-bee/beeai-code-interpreter:latest
+    container_name: beeai-code-interpreter
+    ports:
+      - "50081:50081"
+    environment:
+      - LOG_LEVEL=info
+      - WORKERS=1
+    volumes:
+      - code-interpreter-data:/tmp/code_interpreter
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:50081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # MCP Server - your domain tools server
+  mcp-server:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dr-ikechukwu-mcp-server
+    ports:
+      - "8001:8001"
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - CODE_INTERPRETER_URL=http://beeai-code-interpreter:50081
+      - CODE_INTERPRETER_TMPDIR=/tmp/code_interpreter_target
+    depends_on:
+      - beeai-code-interpreter
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+
+volumes:
+  code-interpreter-data:
