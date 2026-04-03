@@ -17,6 +17,7 @@ from beeai_framework.agents.requirement import RequirementAgent
 from beeai_framework.agents.requirement.requirements.conditional import ConditionalRequirement
 from beeai_framework.backend import ChatModel
 from beeai_framework.tools.think import ThinkTool
+from beeai_framework.tools.search.duckduckgo import DuckDuckGoSearchTool
 
 # Shared schemas and prompts
 from shared.schemas import (
@@ -37,9 +38,6 @@ from app.core.config import openrouter_config
 
 # MCP Tools - Using client helper to fetch from MCP server
 from mcp_clients.client import get_mcp_tools_sync, get_fallback_tools
-
-# BeeAI built-in tools
-from beeai_framework.tools.think import ThinkTool
 
 # BeeAI middleware for trajectory monitoring
 from beeai_framework.middleware.trajectory import GlobalTrajectoryMiddleware
@@ -69,12 +67,10 @@ def create_code_generator_agent() -> Optional[RequirementAgent]:
                 base_url=openrouter_config.base_url
             ),
             tools=(
-                [ThinkTool()] + mcp_tools
+                [ThinkTool(), DuckDuckGoSearchTool() ] + mcp_tools
             ),
             instructions=CODING_CODE_GENERATOR_PROMPT,
-            requirements=[
-                ConditionalRequirement(ThinkTool, force_at_step=1),
-            ],
+            requirements = [ ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2) ],
             middlewares=[GlobalTrajectoryMiddleware()],
         )
         
@@ -104,11 +100,10 @@ def create_code_reviewer_agent() -> Optional[RequirementAgent]:
             ),
             tools=[
                 ThinkTool(),
+                DuckDuckGoSearchTool(),
             ] + mcp_tools,
             instructions=CODING_CODE_REVIEWER_PROMPT,
-            requirements=[
-                ConditionalRequirement(ThinkTool, force_at_step=1),
-            ],
+            requirements = [ ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2) ],
             middlewares=[GlobalTrajectoryMiddleware()],
         )
         
@@ -138,11 +133,10 @@ def create_code_debugger_agent() -> Optional[RequirementAgent]:
             ),
             tools=[
                 ThinkTool(),
+                DuckDuckGoSearchTool(),
             ] + mcp_tools,
             instructions=CODING_CODE_DEBUGGER_PROMPT,
-            requirements=[
-                ConditionalRequirement(ThinkTool, force_at_step=1),
-            ],
+            requirements = [ ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2) ],
             middlewares=[GlobalTrajectoryMiddleware()],
         )
         
@@ -171,11 +165,10 @@ def create_news_anchor_agent() -> Optional[RequirementAgent]:
             ),
             tools=[
                 ThinkTool(),
+                DuckDuckGoSearchTool(),
             ] + mcp_tools,
             instructions=CODING_NEWS_ANCHOR_PROMPT,
-            requirements=[
-                ConditionalRequirement(ThinkTool, force_at_step=1),
-            ],
+            requirements = [ ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2) ],
             middlewares=[GlobalTrajectoryMiddleware()],
         )
         

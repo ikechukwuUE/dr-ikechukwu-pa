@@ -43,10 +43,7 @@ from app.core.config import openrouter_config
 from mcp_clients.client import get_mcp_tools_sync
 
 # BeeAI built-in tools
-from beeai_framework.tools.think import ThinkTool
-
-# BeeAI middleware for trajectory monitoring
-from beeai_framework.middleware.trajectory import GlobalTrajectoryMiddleware
+from beeai_framework.tools.search.duckduckgo import DuckDuckGoSearchTool
 
 # BeeAI middleware for trajectory monitoring
 from beeai_framework.middleware.trajectory import GlobalTrajectoryMiddleware
@@ -79,6 +76,7 @@ def create_financial_coach_agent() -> Optional[RequirementAgent]:
             ),
             tools=[
                 ThinkTool(),
+                DuckDuckGoSearchTool(),
             ] + mcp_tools,
             instructions=FINANCE_FINANCIAL_COACH_PROMPT,
             requirements=[
@@ -115,6 +113,7 @@ def create_writer_agent() -> Optional[RequirementAgent]:
             ),
             tools=[
                 ThinkTool(),
+                DuckDuckGoSearchTool(),
             ] + mcp_tools,
             instructions="""You are a Financial Writer Agent specializing in document formatting.
 
@@ -174,6 +173,7 @@ def create_aggressive_persona_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[
                 ThinkTool(),
+                DuckDuckGoSearchTool(),
             ] + mcp_tools,
             instructions=FINANCE_AGGRESSIVE_PERSONA_PROMPT,
             requirements=[
@@ -213,9 +213,10 @@ def create_conservative_persona_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[
                 ThinkTool(),
+                DuckDuckGoSearchTool()
             ] + mcp_tools,
             instructions=FINANCE_CONSERVATIVE_PERSONA_PROMPT,
-            requirements=[
+            requirements = [
                 ConditionalRequirement(ThinkTool, force_at_step=1),
             ],
             middlewares=[GlobalTrajectoryMiddleware()],
@@ -253,9 +254,10 @@ def create_risk_assessor_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[
                 ThinkTool(),
+                DuckDuckGoSearchTool(),
             ] + mcp_tools,
             instructions=FINANCE_RISK_ASSESSOR_PROMPT,
-            requirements=[
+            requirements = [
                 ConditionalRequirement(ThinkTool, force_at_step=1),
             ],
             middlewares=[GlobalTrajectoryMiddleware()],
@@ -289,9 +291,10 @@ def create_news_anchor_agent() -> Optional[RequirementAgent]:
             ),
             tools=[
                 ThinkTool(),
+                DuckDuckGoSearchTool(),
             ] + mcp_tools,
             instructions=FINANCE_NEWS_ANCHOR_PROMPT,
-            requirements=[
+            requirements = [
                 ConditionalRequirement(ThinkTool, force_at_step=1),
             ],
             middlewares=[GlobalTrajectoryMiddleware()],

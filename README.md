@@ -41,32 +41,81 @@ Result → JSON Response → React
 ### Option 1: Docker Deployment (Recommended)
 
 ```bash
-# Clone and navigate to project
-cd dr_ikechukwu_pa
-
-# Start all services
+# Start all services (4 servers)
 docker-compose up -d
 
-# Services will be available at:
-# - Frontend: http://localhost:5173
-# - Backend API: http://localhost:5000
-# - MCP Server: http://localhost:8001/mcp
-# - Code Interpreter: http://localhost:50081
+# Services available at:
+# - Frontend:         http://localhost:5173
+# - Backend API:     http://localhost:5000
+# - MCP Server:       http://localhost:8001/mcp
+# - Code Interpreter: http://localhost:50081 (for real code execution)
+
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f
 ```
 
-### Option 2: Manual Setup
+### Option 2: Manual Setup (4 Separate Terminals)
+
+Run **4 separate servers** for full functionality:
 
 ```bash
-# Backend
+# ============================================
+# TERMINAL 1: Code Interpreter (optional)
+# ============================================
+# For real Python code execution - requires Docker
+docker run -p 50081:50081 i-am-bee/beeai-code-interpreter:latest
+# OR: docker-compose up beeai-code-interpreter
+
+
+# ============================================
+# TERMINAL 2: MCP Server (domain tools)
+# ============================================
 cd backend
 pip install -r requirements.txt
-python app.py
+python -m mcp_servers.server
+# Runs at: http://localhost:8001/mcp
 
-# Frontend (new terminal)
+
+# ============================================
+# TERMINAL 3: Flask API Gateway
+# ============================================
+cd backend
+python app.py
+# Runs at: http://localhost:5000
+
+
+# ============================================
+# TERMINAL 4: React Frontend
+# ============================================
 cd frontend
 npm install
 npm run dev
+# Runs at: http://localhost:5173
 ```
+
+### Environment Setup
+
+Create `backend/.env`:
+
+```env
+OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+MCP_SERVER_URL=http://127.0.0.1:8001/mcp
+CODE_INTERPRETER_URL=http://127.0.0.1:50081
+```
+
+### Service Overview
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| **Flask API** | 5000 | Main API gateway |
+| **MCP Server** | 8001 | Domain tools (medicine, finance, coding, fashion) |
+| **Code Interpreter** | 50081 | Real Python code execution |
+| **React Frontend** | 5173 | User interface |
+
+> **Note**: If Code Interpreter unavailable, agents use fallback tools.
 
 ## 📁 Project Structure
 

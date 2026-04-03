@@ -17,6 +17,7 @@ from beeai_framework.agents.requirement import RequirementAgent
 from beeai_framework.agents.requirement.requirements.conditional import ConditionalRequirement
 from beeai_framework.backend import ChatModel
 from beeai_framework.tools.think import ThinkTool
+from beeai_framework.tools.search.duckduckgo import DuckDuckGoSearchTool
 
 # Shared schemas and prompts
 from shared.schemas import (
@@ -78,12 +79,14 @@ def create_outfit_descriptor_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[
                 ThinkTool(),
+                DuckDuckGoSearchTool(),
                 fashion_trend_api,
             ],
             instructions=FASHION_OUTFIT_DESCRIPTOR_PROMPT,
             requirements=[
                 ConditionalRequirement(ThinkTool, force_at_step=1),
                 ConditionalRequirement(fashion_trend_api, min_invocations=1),
+                ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2),
             ],
             middlewares=[GlobalTrajectoryMiddleware()],
         )
@@ -116,12 +119,14 @@ def create_outfit_analyzer_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[
                 ThinkTool(),
+                DuckDuckGoSearchTool(),
                 fashion_trend_api,
             ],
             instructions=FASHION_OUTFIT_ANALYZER_PROMPT,
             requirements=[
                 ConditionalRequirement(ThinkTool, force_at_step=1),
                 ConditionalRequirement(fashion_trend_api, min_invocations=1),
+                ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2),
             ],
             middlewares=[GlobalTrajectoryMiddleware()],
         )
@@ -154,12 +159,14 @@ def create_style_trend_analyzer_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[
                 ThinkTool(),
+                DuckDuckGoSearchTool(),
                 fashion_trend_api,
             ],
             instructions=FASHION_STYLE_TREND_ANALYZER_PROMPT,
             requirements=[
-                ConditionalRequirement(ThinkTool, force_at_step=1),
                 ConditionalRequirement(fashion_trend_api, min_invocations=2, max_invocations=4),
+                ConditionalRequirement(ThinkTool, force_at_step=1),
+                ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2),
             ],
             middlewares=[GlobalTrajectoryMiddleware()],
         )
@@ -193,6 +200,7 @@ def create_style_planner_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[
                 ThinkTool(),
+                DuckDuckGoSearchTool(),
                 fashion_trend_api,
                 price_comparison,
                 OpenMeteoTool(),
@@ -200,6 +208,7 @@ def create_style_planner_agent() -> Optional[RequirementAgent]:
             instructions=FASHION_STYLE_PLANNER_PROMPT,
             requirements=[
                 ConditionalRequirement(ThinkTool, force_at_step=1),
+                ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2),
                 ConditionalRequirement(fashion_trend_api, min_invocations=1),
                 ConditionalRequirement(price_comparison, min_invocations=1, max_invocations=3),
                 ConditionalRequirement(OpenMeteoTool, min_invocations=0, max_invocations=1),

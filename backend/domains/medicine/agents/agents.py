@@ -61,7 +61,6 @@ from app.core.config import openrouter_config
 from mcp_clients.client import get_mcp_tools_sync, get_fallback_tools, create_mcp_agent
 
 # BeeAI built-in tools
-from beeai_framework.tools.think import ThinkTool
 from beeai_framework.tools.search.duckduckgo import DuckDuckGoSearchTool
 
 # BeeAI middleware for trajectory monitoring
@@ -119,9 +118,6 @@ def create_coordinator_agent() -> Optional[RequirementAgent]:
                 DuckDuckGoSearchTool(),
             ] + mcp_tools,
             instructions=MEDICINE_COORDINATOR_PROMPT,
-            requirements=[
-                ConditionalRequirement(ThinkTool, force_at_step=1),
-            ],
             middlewares=[GlobalTrajectoryMiddleware()],
         )
         
@@ -153,9 +149,6 @@ def create_triage_agent() -> Optional[RequirementAgent]:
                 DuckDuckGoSearchTool(),
             ] + mcp_tools,
             instructions=MEDICINE_TRIAGE_PROMPT,
-            requirements=[
-                ConditionalRequirement(ThinkTool, force_at_step=1),
-            ],
             middlewares=[GlobalTrajectoryMiddleware()],
         )
         
@@ -227,7 +220,6 @@ def create_specialist_agent(specialty: str = "General Medicine") -> Optional[Req
             ] + get_mcp_tools_sync(openrouter_config.mcp_server_url),
             instructions=prompt,
             requirements=[
-                ConditionalRequirement(ThinkTool, force_at_step=1),
                 ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2),
             ],
         )
@@ -254,7 +246,7 @@ def create_internal_physician_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[ThinkTool(), DuckDuckGoSearchTool()],
             instructions=MEDICINE_INTERNAL_PHYSICIAN_PROMPT,
-            requirements=[ConditionalRequirement(ThinkTool, force_at_step=1)],
+            requirements=[ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2)],
         )
         logger.info("Internal Physician Agent created")
         return agent
@@ -277,7 +269,7 @@ def create_general_surgeon_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[ThinkTool(), DuckDuckGoSearchTool()],
             instructions=MEDICINE_GENERAL_SURGEON_PROMPT,
-            requirements=[ConditionalRequirement(ThinkTool, force_at_step=1)],
+            requirements=[ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2)],
         )
         logger.info("General Surgeon Agent created")
         return agent
@@ -300,7 +292,7 @@ def create_pediatrician_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[ThinkTool(), DuckDuckGoSearchTool()],
             instructions=MEDICINE_PEDIATRICIAN_PROMPT,
-            requirements=[ConditionalRequirement(ThinkTool, force_at_step=1)],
+            requirements=[ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2)],
         )
         logger.info("Pediatrician Agent created")
         return agent
@@ -323,7 +315,7 @@ def create_gynecologist_obstetrician_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[ThinkTool(), DuckDuckGoSearchTool()],
             instructions=MEDICINE_GYNECOLOGIST_OBSTETRICIAN_PROMPT,
-            requirements=[ConditionalRequirement(ThinkTool, force_at_step=1)],
+            requirements=[ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2)],
         )
         logger.info("Gynecologist/Obstetrician Agent created")
         return agent
@@ -346,7 +338,7 @@ def create_pharmacist_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[ThinkTool(), DuckDuckGoSearchTool()],
             instructions=MEDICINE_PHARMACIST_PROMPT,
-            requirements=[ConditionalRequirement(ThinkTool, force_at_step=1)],
+            requirements=[ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2)],
         )
         logger.info("Pharmacist Agent created")
         return agent
@@ -369,7 +361,7 @@ def create_pathologist_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[ThinkTool(), DuckDuckGoSearchTool()],
             instructions=MEDICINE_PATHOLOGIST_PROMPT,
-            requirements=[ConditionalRequirement(ThinkTool, force_at_step=1)],
+            requirements=[ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2)],
         )
         logger.info("Pathologist Agent created")
         return agent
@@ -392,7 +384,7 @@ def create_radiologist_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[ThinkTool(), DuckDuckGoSearchTool()],
             instructions=MEDICINE_RADIOLOGIST_PROMPT,
-            requirements=[ConditionalRequirement(ThinkTool, force_at_step=1)],
+            requirements=[ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2)],
         )
         logger.info("Radiologist Agent created")
         return agent
@@ -415,7 +407,7 @@ def create_anesthesiologist_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[ThinkTool(), DuckDuckGoSearchTool()],
             instructions=MEDICINE_ANESTHESIOLOGIST_PROMPT,
-            requirements=[ConditionalRequirement(ThinkTool, force_at_step=1)],
+            requirements=[ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2)],
         )
         logger.info("Anesthesiologist Agent created")
         return agent
@@ -438,7 +430,7 @@ def create_family_physician_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[ThinkTool(), DuckDuckGoSearchTool()],
             instructions=MEDICINE_FAMILY_PHYSICIAN_PROMPT,
-            requirements=[ConditionalRequirement(ThinkTool, force_at_step=1)],
+            requirements=[ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2)],
         )
         logger.info("Family Physician Agent created")
         return agent
@@ -461,7 +453,7 @@ def create_community_physician_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[ThinkTool(), DuckDuckGoSearchTool()],
             instructions=MEDICINE_COMMUNITY_PHYSICIAN_PROMPT,
-            requirements=[ConditionalRequirement(ThinkTool, force_at_step=1)],
+            requirements=[ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2)],
         )
         logger.info("Community Physician Agent created")
         return agent
@@ -484,7 +476,7 @@ def create_psychiatrist_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[ThinkTool(), DuckDuckGoSearchTool()],
             instructions=MEDICINE_PSYCHIATRIST_PROMPT,
-            requirements=[ConditionalRequirement(ThinkTool, force_at_step=1)],
+            requirements=[ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2)],
         )
         logger.info("Psychiatrist Agent created")
         return agent
@@ -507,7 +499,7 @@ def create_ophthalmologist_agent() -> Optional[RequirementAgent]:
             llm=model,
             tools=[ThinkTool(), DuckDuckGoSearchTool()],
             instructions=MEDICINE_OPHTHALMOLOGIST_PROMPT,
-            requirements=[ConditionalRequirement(ThinkTool, force_at_step=1)],
+            requirements=[ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=0, max_invocations=2)],
         )
         logger.info("Ophthalmologist Agent created")
         return agent
@@ -535,10 +527,6 @@ def create_emergency_physician_agent() -> Optional[RequirementAgent]:
                 # medical_database_search,
             ],
             instructions=MEDICINE_EMERGENCY_PROMPT,
-            requirements=[
-                ConditionalRequirement(ThinkTool, force_at_step=1),
-                # ConditionalRequirement(medical_database_search, min_invocations=1),
-            ],
         )
         
         logger.info("Emergency Physician Agent created successfully")
@@ -585,7 +573,6 @@ Output format: Return a JSON object with:
 - feedback: Your clinical feedback
 - modifications: Specific modifications requested (if any)""",
             requirements=[
-                ConditionalRequirement(ThinkTool, force_at_step=1),
                 AskPermissionRequirement(),
             ],
         )
@@ -625,7 +612,6 @@ def create_researcher_agent() -> Optional[RequirementAgent]:
             ] + mcp_tools,
             instructions=MEDICINE_RESEARCHER_PROMPT,
             requirements=[
-                ConditionalRequirement(ThinkTool, force_at_step=1),
                 ConditionalRequirement(DuckDuckGoSearchTool, min_invocations=1, max_invocations=3),
             ],
         )
@@ -655,10 +641,10 @@ def create_scientific_writer_agent() -> Optional[RequirementAgent]:
             tools=[
                 ThinkTool(),
             ],
-            instructions=MEDICINE_SCIENTIFIC_WRITER_PROMPT,
-            requirements=[
+            requirements = [
                 ConditionalRequirement(ThinkTool, force_at_step=1),
-            ],
+                ],
+            instructions=MEDICINE_SCIENTIFIC_WRITER_PROMPT,
         )
         
         logger.info("Scientific Writer Agent created successfully")
@@ -689,10 +675,10 @@ def create_clinical_management_agent() -> Optional[RequirementAgent]:
                 ThinkTool(),
                 DuckDuckGoSearchTool(),
             ] + mcp_tools,
-            instructions=MEDICINE_CLINICAL_MANAGEMENT_PROMPT,
-            requirements=[
+            requirements = [
                 ConditionalRequirement(ThinkTool, force_at_step=1),
             ],
+            instructions=MEDICINE_CLINICAL_MANAGEMENT_PROMPT,
         )
         
         logger.info("Clinical Management Agent created successfully")
